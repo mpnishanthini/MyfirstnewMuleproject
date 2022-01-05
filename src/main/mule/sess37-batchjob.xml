@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7f94cf51-3388-4254-b1a6-d8b4960e1d2a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="sess37-batchjobFlow" doc:id="8c0fa876-5d5a-49b4-a83d-627d513879a0" >
+		<http:listener doc:name="Listener" doc:id="41a88a8d-7270-4e45-a641-69920e4a1ac5" config-ref="HTTP_Listener_config" path="/batch"/>
+		<set-payload value='#[[1,2,3,4,"a","b",5,6]]' doc:name="Set Payload" doc:id="5d66b604-78b0-4bc8-a59d-58e0cbe25169" />
+		<batch:job jobName="sess37-batchjobBatch_Job" doc:id="6a6d01aa-3ce5-49eb-9a8f-7841c06e832d" maxFailedRecords="10">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="aa76bdfa-062e-44ed-b7e1-17d723af9879" >
+					<set-payload value="#[payload * 10]" doc:name="Set Payload" doc:id="87ba9e4c-2d3f-4a34-89ec-0a8eb1d59565" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="c57d3b6a-83d4-44f3-ad75-e85f9b559dbf" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="ab671efa-cf7e-490a-a9fb-76f9edcde974" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+				<batch:step name="Batch_Step2" doc:id="7bd42172-66dd-441a-82dd-07637b69a0a6" >
+					<set-payload value="#[payload + 5]" doc:name="Set Payload" doc:id="8707450f-be2a-4bc1-8dc8-77d2634323f7" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="84c99dd4-faf2-4df8-8b42-6d628b09c474" size="3">
+						<logger level="INFO" doc:name="Logger" doc:id="3fb7d281-c7cc-4708-82ce-fc41d7d83c0a" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="a97296e8-2634-4111-9e56-843e88cd0619" acceptPolicy="ONLY_FAILURES">
+					<set-payload value="#[payload]" doc:name="Set Payload" doc:id="2ad133ae-4325-41cd-a7d4-8a16a58a0434" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="b2a0859e-1c01-4b44-b2c0-a19cb83d46c3" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="c29ccbf5-57d8-4368-90f3-ceaef95cc22c" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="9d3a8557-fd81-4099-b2e9-3ec3c87ca048" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
